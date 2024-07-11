@@ -17,6 +17,8 @@ options.UseSqlServer(
     builder.Configuration.GetConnectionString(
         "ConnectionString")));
 
+builder.Services.AddCors();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -30,6 +32,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseCors(options =>
+{
+    options.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+});
 
 app.UseAuthentication();
 
