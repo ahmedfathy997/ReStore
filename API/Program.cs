@@ -13,9 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<StoreContext>(options =>
-options.UseSqlServer(
-    builder.Configuration.GetConnectionString(
-        "ConnectionString")));
+options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString")));
 
 builder.Services.AddCors();
 
@@ -38,7 +36,6 @@ app.UseCors(options =>
 });
 
 app.UseAuthentication();
-
 
 app.UseEndpoints(endpoints =>
 {
