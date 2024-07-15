@@ -12,7 +12,7 @@ namespace API.Controllers
         [HttpGet("bad-request")]
         public IActionResult GetBadRequest()
         {
-            return BadRequest("This is a bad request.!");
+            return BadRequest();
         }
         [HttpGet("unauthorized")]
         public IActionResult GetUnAuthorized()

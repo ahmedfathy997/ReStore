@@ -1,8 +1,50 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
+import { toast } from "react-toastify";
+import history from "../../history";
+
+interface ErrorResponse {
+  title: string;
+  errors?: { [key: string]: string[] };
+}
+
+const sleep = () => new Promise(resolve => setTimeout(resolve, 500));
 
 axios.defaults.baseURL = "http://localhost:5225/api/";
 
 const responseBody = (response: AxiosResponse) => response.data;
+
+axios.interceptors.response.use(async response => {
+      await sleep();
+      return response
+}, (error: AxiosError) => {
+    const {data, status} = error.response!;
+    const errorData = data as ErrorResponse;
+
+    switch (status) {
+      case 400:
+        if (errorData.errors) {
+            const modelStateErrors: string[] = [];
+            for (const key in errorData.errors){
+              if(errorData.errors[key]){
+                modelStateErrors.push(...errorData.errors[key])
+              }
+            }
+            throw modelStateErrors.flat();
+        }
+        toast.error(errorData.title)
+        break;
+      case 401:
+        toast.error(errorData.title)
+        break;
+      case 500:
+        history.push("/server-error")
+        break;  
+      default:
+        break;
+    }
+
+    return Promise.reject(error.message);
+})
 
 const requests = {
   get: (url: string) => axios.get(url).then(responseBody),
