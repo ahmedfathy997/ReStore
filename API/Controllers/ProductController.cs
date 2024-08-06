@@ -18,7 +18,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task <ActionResult<List<Product>>> GetProducts()
         {
-            var products = await _context.Products.ToListAsync();
+            var products = await _context.Products.OrderBy(product => product.Name).ToListAsync();
             return Ok(products);
         }
         // GET: api/Products/Id
