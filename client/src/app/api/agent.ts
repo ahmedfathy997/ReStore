@@ -57,6 +57,7 @@ const requests = {
 const Catalog = {
   list: () => requests.get("product"),
   details: (id: number) => requests.get(`product/${id}`),
+  fetchFilters: () => requests.get("product/filters")
 };
 
 const TestErrors = {
