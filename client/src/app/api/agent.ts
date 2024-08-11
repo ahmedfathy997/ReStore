@@ -1,63 +1,76 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import history from "../../history";
+import { PaginatedResponse } from "../models/pagination";
 
 interface ErrorResponse {
   title: string;
   errors?: { [key: string]: string[] };
 }
 
-const sleep = () => new Promise(resolve => setTimeout(resolve, 500));
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 500));
 
 axios.defaults.baseURL = "http://localhost:5225/api/";
 axios.defaults.withCredentials = true;
 
 const responseBody = (response: AxiosResponse) => response.data;
 
-axios.interceptors.response.use(async response => {
-      await sleep();
-      return response
-}, (error: AxiosError) => {
-    const {data, status} = error.response!;
+axios.interceptors.response.use(
+  async (response) => {
+    await sleep();
+    const pagination = response.headers["pagination"];
+    if (pagination) {
+      response.data = new PaginatedResponse(
+        response.data,
+        JSON.parse(pagination)
+      );
+      return response;
+    }
+    return response;
+  },
+  (error: AxiosError) => {
+    const { data, status } = error.response!;
     const errorData = data as ErrorResponse;
 
     switch (status) {
       case 400:
         if (errorData.errors) {
-            const modelStateErrors: string[] = [];
-            for (const key in errorData.errors){
-              if(errorData.errors[key]){
-                modelStateErrors.push(...errorData.errors[key])
-              }
+          const modelStateErrors: string[] = [];
+          for (const key in errorData.errors) {
+            if (errorData.errors[key]) {
+              modelStateErrors.push(...errorData.errors[key]);
             }
-            throw modelStateErrors.flat();
+          }
+          throw modelStateErrors.flat();
         }
-        toast.error(errorData.title)
+        toast.error(errorData.title);
         break;
       case 401:
-        toast.error(errorData.title)
+        toast.error(errorData.title);
         break;
       case 500:
-        history.push("/server-error")
-        break;  
+        history.push("/server-error");
+        break;
       default:
         break;
     }
 
     return Promise.reject(error.message);
-})
+  }
+);
 
 const requests = {
-  get: (url: string) => axios.get(url).then(responseBody),
+  get: (url: string, params?: URLSearchParams) =>
+    axios.get(url, { params }).then(responseBody),
   post: (url: string, body: {}) => axios.post(url, body).then(responseBody),
   put: (url: string, body: {}) => axios.put(url, body).then(responseBody),
   delete: (url: string) => axios.delete(url).then(responseBody),
 };
 
 const Catalog = {
-  list: () => requests.get("product"),
+  list: (params: URLSearchParams) => requests.get("product", params),
   details: (id: number) => requests.get(`product/${id}`),
-  fetchFilters: () => requests.get("product/filters")
+  fetchFilters: () => requests.get("product/filters"),
 };
 
 const TestErrors = {
@@ -70,15 +83,16 @@ const TestErrors = {
 
 const Basket = {
   get: () => requests.get("basket"),
-  addItem: (productId: number, quantity = 1) => requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
-  removeItem: (productId: number, quantity = 1) => requests.delete(`basket?productId=${productId}&quantity=${quantity}`)
-
-}
+  addItem: (productId: number, quantity = 1) =>
+    requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
+  removeItem: (productId: number, quantity = 1) =>
+    requests.delete(`basket?productId=${productId}&quantity=${quantity}`),
+};
 
 const agent = {
   Catalog,
   TestErrors,
-  Basket
+  Basket,
 };
 
 export default agent;

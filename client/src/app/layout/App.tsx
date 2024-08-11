@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import Catalog from "../../features/catalog/Catalog";
 import Header from "./Header";
-import { Container, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import {
+  Container,
+  createTheme,
+  CssBaseline,
+  ThemeProvider,
+} from "@mui/material";
 import { Route, Routes } from "react-router-dom";
 import HomePage from "../../features/home/HomePage";
 import ProductDetails from "../../features/catalog/ProductDetails";
@@ -20,38 +25,38 @@ import { useAppDispatch } from "../store/configureStore";
 import { setBasket } from "../../features/basket/basketSlice";
 
 function App() {
-const dispatch = useAppDispatch();
-const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(false);
 
-useEffect(() =>{
-  const buyerId = getCookie("buyerId");
-  if (buyerId){
-    agent.Basket.get()
-    .then(basket => dispatch(setBasket(basket)))
-    .catch(error => console.log(error))
-    .finally(() => setLoading(false));
+  useEffect(() => {
+    const buyerId = getCookie("buyerId");
+    if (buyerId) {
+      agent.Basket.get()
+        .then((basket) => dispatch(setBasket(basket)))
+        .catch((error) => console.log(error))
+        .finally(() => setLoading(false));
+    }
+  }, [dispatch]);
+
+  const [darkMode, setDarkMode] = useState(false);
+  const paletteType = darkMode ? "dark" : "light";
+  const theme = createTheme({
+    palette: {
+      mode: paletteType,
+    },
+  });
+
+  function handleThemeChange() {
+    setDarkMode(!darkMode);
   }
-}, [setBasket])
 
-const [darkMode, setDarkMode] = useState(false);
-const paletteType = darkMode ? 'dark' : 'light';
-const theme = createTheme({
-  palette: {
-    mode : paletteType,
-  }
-})
-
-function handleThemeChange(){
-  setDarkMode(!darkMode);
-}
-
-if(loading) return <LoadingComponents message="Initializing app..." />
+  if (loading) return <LoadingComponents message="Initializing app..." />;
 
   return (
     <ThemeProvider theme={theme}>
-      <ToastContainer position="bottom-right" hideProgressBar/>
-    <CssBaseline />
-      <Header darkMode={darkMode} handleThemeChange={handleThemeChange}/>
+      <ToastContainer position="bottom-right" hideProgressBar />
+      <CssBaseline />
+      <Header darkMode={darkMode} handleThemeChange={handleThemeChange} />
       <Container>
         <Routes>
           <Route path="/" Component={HomePage} />

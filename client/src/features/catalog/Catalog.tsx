@@ -1,83 +1,97 @@
 import { useEffect } from "react";
 import LoadingComponents from "../../app/layout/LoadingComponents";
-import { fetchFilters, fetchProductsAsync, productSelectors } from "./catalogSlice";
+import {
+  fetchFilters,
+  fetchProductsAsync,
+  productSelectors,
+  setPageNumber,
+  setProductParams,
+} from "./catalogSlice";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import ProductList from "./ProductList";
-import { Box, Checkbox, FormControl, FormControlLabel, FormGroup, Grid, Pagination, Paper, Radio, RadioGroup, TextField, Typography } from "@mui/material";
+import { Grid, Paper } from "@mui/material";
+import ProductSearch from "./ProductSearch";
+import RadioButtonGroup from "../../app/components/RadioButtonGroup";
+import CheckBoxButton from "../../app/components/CheckBoxButton";
+import AppPagination from "../../app/components/AppPagination";
 
 const sortOptions = [
-  {value: "name", label : "Alphabetical"},
-  {value: "priceDesc", label : "Price - High to low"},
-  {value: "price", label : "Price - Low to high"}
-
-]
+  { value: "name", label: "Alphabetical" },
+  { value: "priceDesc", label: "Price - High to low" },
+  { value: "price", label: "Price - Low to high" },
+];
 
 export default function Catalog() {
   const products = useAppSelector(productSelectors.selectAll);
-  const { productLoadedState, filtersLoaded, status, brands, types} = useAppSelector(state => state.catalog);
+  const {
+    productLoadedState,
+    filtersLoaded,
+    brands,
+    types,
+    productParams,
+    metaData,
+  } = useAppSelector((state) => state.catalog);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if(!productLoadedState) dispatch(fetchProductsAsync());
-  }, [productLoadedState, dispatch, ]);
+    if (!productLoadedState) dispatch(fetchProductsAsync());
+  }, [productLoadedState, dispatch]);
 
   useEffect(() => {
-    if(!filtersLoaded) dispatch(fetchFilters());
-  }, [dispatch, filtersLoaded])
+    if (!filtersLoaded) dispatch(fetchFilters());
+  }, [dispatch, filtersLoaded]);
 
-  if(status.includes("pending")) return <LoadingComponents message="Loading Products..."/>
+  if (!filtersLoaded)
+    return <LoadingComponents message="Loading Products..." />;
 
   return (
-    <Grid container spacing={4}>
+    <Grid container columnSpacing={4}>
       <Grid item xs={3}>
-        <Paper sx={{mb: 2}}>
-          <TextField
-            label= "Search Products"
-            variant="outlined"
-            fullWidth
+        <Paper sx={{ mb: 2 }}>
+          <ProductSearch />
+        </Paper>
+        <Paper sx={{ mb: 2, p: 2 }}>
+          <RadioButtonGroup
+            options={sortOptions}
+            onChange={(e) =>
+              dispatch(setProductParams({ orderBy: e.target.value }))
+            }
+            selectedValue={productParams.orderBy}
           />
         </Paper>
-        <Paper sx={{mb: 2, p: 2}}>
-            <FormControl>
-              <RadioGroup>
-                {sortOptions.map(({value, label}) => (
-                    <FormControlLabel value={value} control={<Radio />} label={label} key={value}/>
-                ))}
-            </RadioGroup>
-          </FormControl>
+        <Paper sx={{ mb: 2, p: 2 }}>
+          <CheckBoxButton
+            items={brands}
+            checked={productParams.brands}
+            onChange={(items: string[]) =>
+              dispatch(setProductParams({ brands: items }))
+            }
+          />
         </Paper>
-        <Paper sx={{mb: 2, p: 2}}>
-          <FormGroup>
-            {brands.map(brand => (
-                <FormControlLabel control={<Checkbox />} label={brand} key={brand}/>
-            ))}
-          </FormGroup>
-        </Paper>
-        <Paper sx={{mb: 2, p: 2}}>
-          <FormGroup>
-            {types.map(type => (
-                <FormControlLabel control={<Checkbox />} label={type} key={type}/>
-            ))}
-          </FormGroup>
+        <Paper sx={{ mb: 2, p: 2 }}>
+          <CheckBoxButton
+            items={types}
+            checked={productParams.types}
+            onChange={(items: string[]) =>
+              dispatch(setProductParams({ types: items }))
+            }
+          />
         </Paper>
       </Grid>
       <Grid item xs={9}>
-        <ProductList products={products}/>
+        <ProductList products={products} />
       </Grid>
-      <Grid item xs={3}/>
-      <Grid item xs={9}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography>
-                Displaying 1-6 of 20 items
-            </Typography>
-            <Pagination
-               color="secondary"
-               size="large"
-               count={10}
-               page={2}
-            />
-        </Box>
+      <Grid item xs={3} />
+      <Grid item xs={9} sx={{ mb: 2 }}>
+        {metaData && (
+          <AppPagination
+            metaData={metaData}
+            onPageChange={(page: number) =>
+              dispatch(setPageNumber({ pageNumber: page }))
+            }
+          />
+        )}
       </Grid>
     </Grid>
-  )
+  );
 }
