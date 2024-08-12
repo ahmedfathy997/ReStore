@@ -108,7 +108,6 @@ export const catalogSlice = createSlice({
       state.productParams = {
         ...state.productParams,
         ...action.payload,
-        pageNumber: 1,
       };
     },
     setMetaData: (state, action) => {
