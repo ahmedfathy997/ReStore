@@ -1,6 +1,6 @@
 using API.Data;
 using API.Entities;
-using API.Middlerware;
+using API.Middleware;
 using API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -17,8 +17,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme{
-        Description = "Jwt auth header",
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -68,9 +69,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<PaymentService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -92,7 +93,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => 
+    app.UseSwaggerUI(c =>
     {
         c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
     });
@@ -109,13 +110,18 @@ app.UseCors(); // Use the default CORS policy
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
+app.Use(async (context, next) =>
 {
-    endpoints.MapControllers();
+    context.Response.Headers.Add("Content-Security-Policy", "script-src 'self' https://js.stripe.com https://m.stripe.network 'unsafe-inline'");
+    await next();
 });
 
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
 // Seed the database
-var scope = app.Services.CreateScope();
+using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();

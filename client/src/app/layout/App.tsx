@@ -17,14 +17,15 @@ import NotFound from "../errors/NotFound";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BasketPage from "../../features/basket/BasketPage";
-import LoadingComponents from "./LoadingComponents";
-import CheckoutPage from "../../features/checkout/CheckoutPage";
+import LoadingComponents from "./LoadingComponent";
 import { useAppDispatch } from "../store/configureStore";
 import { fetchBasketAsync } from "../../features/basket/basketSlice";
 import Login from "../../features/account/Login";
 import Register from "../../features/account/Register";
 import { fetchCurrentUser } from "../../features/account/accountSlice";
 import PrivateRoute from "./PrivateRoute";
+import Orders from "../../features/orders/Orders";
+import CheckoutWrapper from "../../features/checkout/CheckoutWrapper";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -71,7 +72,8 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/server-error" element={<ServerError />} />
           <Route path="/basket" element={<BasketPage />} />
-          <Route path="/checkout" element={<PrivateRoute element={<CheckoutPage />} />} />
+          <Route path="/checkout" element={<PrivateRoute element={<CheckoutWrapper />} />} />
+          <Route path="/orders" element={<Orders />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />

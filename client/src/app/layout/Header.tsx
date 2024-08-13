@@ -40,7 +40,7 @@ export default function Header({darkMode, handleThemeChange} : Props){
     const {basket} = useAppSelector(state=> state.basket);
     const {user} = useAppSelector(state=> state.account);
 
-    const itemCount = basket?.basketItemDtos.reduce((sum, item) => sum + item.quantity, 0);
+    const itemCount = basket?.items.reduce((sum, item) => sum + item.quantity, 0);
    
     return(
         <AppBar position="static" sx={{mb: 4}}>

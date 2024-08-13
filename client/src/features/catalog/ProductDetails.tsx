@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import NotFound from "../../app/errors/NotFound";
-import LoadingComponents from "../../app/layout/LoadingComponents";
+import LoadingComponents from "../../app/layout/LoadingComponent";
 import { currencyFormat } from "../../app/util/util";
 import { LoadingButton } from "@mui/lab";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
@@ -26,7 +26,7 @@ export default function ProductDetails() {
   const product = useAppSelector(state => productSelectors.selectById(state, parseInt(`${id}`)));
   const {status: productStatus} =useAppSelector(state => state.catalog)
   const [quantity, setQuantity] = useState(0);
-  const item = basket?.basketItemDtos.find(i => i.productId === product?.id);
+  const item = basket?.items.find(i => i.productId === product?.id);
 
 
 

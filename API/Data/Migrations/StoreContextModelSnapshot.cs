@@ -17,7 +17,7 @@ namespace API.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -32,6 +32,12 @@ namespace API.Data.Migrations
 
                     b.Property<string>("BuyerId")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClientSecret")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentIntentId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -85,6 +91,10 @@ namespace API.Data.Migrations
 
                     b.Property<int>("OrderStatus")
                         .HasColumnType("int");
+
+                    b.Property<string>("PaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("Subtotal")
                         .HasColumnType("bigint");

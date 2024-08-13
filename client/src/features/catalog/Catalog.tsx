@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import LoadingComponents from "../../app/layout/LoadingComponents";
+import LoadingComponents from "../../app/layout/LoadingComponent";
 import {
   fetchFilters,
   fetchProductsAsync,
