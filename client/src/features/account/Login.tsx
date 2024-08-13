@@ -6,7 +6,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Paper } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FieldValues, useForm } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
 import { signInUser } from './accountSlice';
@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const dispatch = useAppDispatch();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const {register, handleSubmit, formState: {isSubmitting, errors, isValid}} = useForm({
@@ -22,8 +23,12 @@ export default function Login() {
   })
 
   async function submitForm(data: FieldValues){
-    await dispatch((signInUser(data)));
-    navigate("/catalog")
+    try {
+      await dispatch((signInUser(data)));
+      navigate(location.state?.from?.pathname || "/catalog")
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
