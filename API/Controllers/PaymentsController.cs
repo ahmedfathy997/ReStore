@@ -15,14 +15,11 @@ public class PaymentsController : BaseApiController
     private readonly PaymentService _paymentService;
     private readonly StoreContext _context;
     private readonly IConfiguration _config;
-    private readonly ILogger<PaymentsController> _logger;
-
-    public PaymentsController(PaymentService paymentService, StoreContext context, IConfiguration config, ILogger<PaymentsController> logger)
+    public PaymentsController(PaymentService paymentService, StoreContext context, IConfiguration config)
     {
         _config = config;
         _context = context;
         _paymentService = paymentService;
-        _logger = logger;
     }
 
     [Authorize]
@@ -50,6 +47,8 @@ public class PaymentsController : BaseApiController
 
         return basket.MapBasketToDto();
     }
+
+    [AllowAnonymous]
     [HttpPost("webhook")]
     public async Task<ActionResult> StripeWebhook()
     {
@@ -63,7 +62,7 @@ public class PaymentsController : BaseApiController
         var order = await _context.Orders.FirstOrDefaultAsync(x =>
             x.PaymentIntentId == charge.PaymentIntentId);
 
-        if (charge.Status == "succeeded") order.OrderStatus = OrderStatus.PaymentReceived;
+        if (charge.Status == "succeeded") order.OrderStatus = OrderStatus.Payment_Received;
 
         await _context.SaveChangesAsync();
 

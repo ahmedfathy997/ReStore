@@ -14,7 +14,7 @@ public static class BasketExtensions
             BuyerId = basket.BuyerId,
             PaymentIntentId = basket.PaymentIntentId,
             ClientSecret = basket.ClientSecret,
-            Items = basket.Items.Select(item => new BasketItemDto
+            BasketItemDtos = basket.Items.Select(item => new BasketItemDto
             {
                 ProductId = item.ProductId,
                 Name = item.Product.Name,
@@ -22,7 +22,7 @@ public static class BasketExtensions
                 PictureUrl = item.Product.PictureUrl,
                 Type = item.Product.Type,
                 Brand = item.Product.Brand,
-                Quantity = item.Quantity
+                Quantity = item.Quantity,
             }).ToList()
         };
     }

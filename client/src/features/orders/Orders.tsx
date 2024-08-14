@@ -2,10 +2,10 @@ import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody
 import { useEffect } from "react";
 import { useState } from "react";
 import agent from "../../app/api/agent";
-import LoadingComponent from "../../app/layout/LoadingComponent";
 import { Order } from "../../app/models/order";
 import { currencyFormat } from "../../app/util/util";
 import OrderDetailed from './OrderDetailed';
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default function Orders() {
     const [orders, setOrders] = useState<Order[] | null>(null);
@@ -24,7 +24,7 @@ export default function Orders() {
 
     if (selectedOrderNumber > 0 && orders) return (
         <OrderDetailed
-            order={orders.find(o => o.id === selectedOrderNumber)!}
+            order={orders?.find(o => o.id === selectedOrderNumber)!}
             setSelectedOrder={setSelectedOrderNumber}
         />
     )

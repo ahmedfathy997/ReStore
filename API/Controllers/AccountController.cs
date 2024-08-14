@@ -30,15 +30,15 @@ namespace API.Controllers
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user = await _userManager.FindByNameAsync(loginDto.Username);
-            if(user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
+            if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
                 return Unauthorized();
 
             var userBasket = await RetrieveBasket(loginDto.Username);
             var anonBasket = await RetrieveBasket(Request.Cookies["buyerId"]);
 
-            if(anonBasket != null)
+            if (anonBasket != null)
             {
-                if(userBasket != null) _context.Baskets.Remove(userBasket);
+                if (userBasket != null) _context.Baskets.Remove(userBasket);
                 anonBasket.BuyerId = user.UserName;
                 Response.Cookies.Delete("buyerId");
                 await _context.SaveChangesAsync();
@@ -98,8 +98,6 @@ namespace API.Controllers
                 .FirstOrDefaultAsync();
             return users;
         }
-
-
         private async Task<Basket> RetrieveBasket(string buyerId)
         {
             if (string.IsNullOrEmpty(buyerId))

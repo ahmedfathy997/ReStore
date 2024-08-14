@@ -1,45 +1,48 @@
-﻿using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
-namespace API.Middleware;
-
-public class ExceptionMiddleware
+namespace API.Middlerware
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionMiddleware> _logger;
-    private readonly IHostEnvironment _env;
-
-    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
+    public class ExceptionMiddleware
     {
-        _next = next;
-        _logger = logger;
-        _env = env;
-    }
+        private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly IHostEnvironment _hostEnvironment;
 
-    public async Task InvokeAsync(HttpContext context)
-    {
-        try
+        public ExceptionMiddleware(RequestDelegate next,
+            ILogger<ExceptionMiddleware> logger, IHostEnvironment hostEnvironment)
         {
-            await _next(context);
+            _next = next;
+            _logger = logger;
+            _hostEnvironment = hostEnvironment;
         }
-        catch (Exception ex)
+
+        public async Task InvokeAsync(HttpContext context)
         {
-            _logger.LogError(ex, ex.Message);
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = 500;
-
-            var response = new ProblemDetails
+            try
             {
-                Status = 500,
-                Detail = _env.IsDevelopment() ? ex.StackTrace?.ToString() : null,
-                Title = ex.Message
-            };
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = 500;
 
-            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                var response = new ProblemDetails
+                {
+                    Status = 500,
+                    Detail = _hostEnvironment.IsDevelopment() ? ex.StackTrace?.ToString() : null,
+                    Title = ex.Message
+                };
 
-            var json = JsonSerializer.Serialize(response, options);
+                var options = new JsonSerializerOptions
+                { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-            await context.Response.WriteAsync(json);
+                var json = JsonSerializer.Serialize(response, options);
+
+                await context.Response.WriteAsync(json);
+            }
         }
     }
 }

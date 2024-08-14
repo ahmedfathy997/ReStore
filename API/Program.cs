@@ -1,6 +1,6 @@
 using API.Data;
 using API.Entities;
-using API.Middleware;
+using API.Middlerware;
 using API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +10,10 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 // Add services to the container
 builder.Services.AddControllers();
@@ -68,22 +72,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTSettings:TokenKey"]))
         };
     });
-
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<PaymentService>();
 
 // Add CORS policy
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()
-              .WithOrigins("http://localhost:3000");
-    });
-});
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -99,26 +93,27 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
-app.UseDefaultFiles();
-app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseCors(); // Use the default CORS policy
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+
+app.UseCors(options =>
+{
+    options
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .WithOrigins("http://localhost:3000");
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Add("Content-Security-Policy", "script-src 'self' https://js.stripe.com https://m.stripe.network 'unsafe-inline'");
-    await next();
-});
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
+app.MapFallbackToController("Index", "Fallback");
 
 // Seed the database
 using var scope = app.Services.CreateScope();

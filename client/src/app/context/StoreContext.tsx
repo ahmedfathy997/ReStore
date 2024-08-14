@@ -23,7 +23,7 @@ export function StoreProvider({children}: PropsWithChildren<any>){
 
     function removeItem(productId: number, quantity: number){
         if(!basket) return;
-        const items = [...basket.items];
+        const items = [...basket.basketItemDtos];
         const itemIndex = items.findIndex(i => i.productId === productId);
 
         if(itemIndex >= 0){

@@ -2,9 +2,9 @@ import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import { User } from "../../app/models/user";
 import agent from "../../app/api/agent";
 import { FieldValues } from "react-hook-form";
-import history from "../../app/hooks/history";
 import { toast } from "react-toastify";
 import { setBasket } from "../basket/basketSlice";
+import history from "../../history";
 
 interface AccountState {
     user: User | null;
