@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
-import history from "../../history";
 import { PaginatedResponse } from "../models/pagination";
+import history from "../../history";
 
 interface ErrorResponse {
   title: string;
@@ -48,6 +48,9 @@ axios.interceptors.response.use(
       case 401:
         toast.error(errorData.title);
         break;
+      case 403:
+        toast.error("Not Allowed to do That.!");
+        break;  
       case 500:
         history.push("/server-error");
         break;
@@ -60,12 +63,17 @@ axios.interceptors.response.use(
 );
 
 const requests = {
-  get: (url: string, params?: URLSearchParams) =>
-    axios.get(url, { params }).then(responseBody),
-  post: (url: string, body: {}) => axios.post(url, body).then(responseBody),
-  put: (url: string, body: {}) => axios.put(url, body).then(responseBody),
-  delete: (url: string) => axios.delete(url).then(responseBody),
-};
+  get: (url: string, params?: URLSearchParams) => axios.get(url, {params}).then(responseBody),
+  post: (url: string, body: object) => axios.post(url, body).then(responseBody),
+  put: (url: string, body: object) => axios.put(url, body).then(responseBody),
+  del: (url: string) => axios.delete(url).then(responseBody),
+  postForm: (url: string, data: FormData) => axios.post(url, data, {
+      headers: {'Content-type': 'multipart/form-data'}
+  }).then(responseBody),
+  putForm: (url: string, data: FormData) => axios.put(url, data, {
+      headers: {'Content-type': 'multipart/form-data'}
+  }).then(responseBody)
+}
 
 const Catalog = {
   list: (params: URLSearchParams) => requests.get("product", params),
@@ -86,7 +94,7 @@ const Basket = {
   addItem: (productId: number, quantity = 1) =>
     requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
   removeItem: (productId: number, quantity = 1) =>
-    requests.delete(`basket?productId=${productId}&quantity=${quantity}`),
+    requests.del(`basket?productId=${productId}&quantity=${quantity}`),
 };
 const Account = {
   login: (values: any) => requests.post('account/login', values),
@@ -103,6 +111,19 @@ const Payments = {
   createPaymentIntent: () => requests.post('payments', {})
 };
 
+function createFormData(item: any){
+  let formData = new FormData();
+  for (const key in item){
+    formData.append(key, item[key])
+  }
+  return formData;
+}
+
+const Admin = {
+  createProduct: (product: any) => requests.postForm('product', createFormData(product)),
+  updateProduct: (product: any) => requests.putForm('product', createFormData(product)),
+  deleteProduct: (id: number) => requests.del(`product/${id}`)
+}
 
 const agent = {
   Catalog,
@@ -110,7 +131,8 @@ const agent = {
   Basket,
   Account,
   Orders,
-  Payments
+  Payments,
+  Admin
 };
 
 export default agent;

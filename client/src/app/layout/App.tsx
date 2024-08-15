@@ -7,7 +7,7 @@ import {
   CssBaseline,
   ThemeProvider,
 } from "@mui/material";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Outlet } from "react-router-dom";
 import HomePage from "../../features/home/HomePage";
 import ProductDetails from "../../features/catalog/ProductDetails";
 import AboutPage from "../../features/about/AboutPage";
@@ -26,10 +26,11 @@ import { fetchCurrentUser } from "../../features/account/accountSlice";
 import PrivateRoute from "./PrivateRoute";
 import CheckoutWrapper from "../../features/checkout/CheckoutWrapper";
 import Orders from "../../features/orders/Orders";
+import Inventory from "../../features/admin/Inventory";
 
 function App() {
   const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const initApp = useCallback(async () => {
     try {
@@ -43,6 +44,7 @@ function App() {
   useEffect(() => {
     initApp().then(() => setLoading(false));
   }, [initApp]);
+
   const [darkMode, setDarkMode] = useState(false);
   const paletteType = darkMode ? "dark" : "light";
   const theme = createTheme({
@@ -63,23 +65,22 @@ function App() {
       <CssBaseline />
       <Header darkMode={darkMode} handleThemeChange={handleThemeChange} />
       <Routes>
-        <Route path="/" Component={HomePage} />
-      </Routes>
-      <Container>
-        <Routes>
-          <Route path="/catalog" Component={Catalog} />
-          <Route path="/catalog/:id" Component={ProductDetails} />
-          <Route path="/about" Component={AboutPage} />
-          <Route path="/contact" Component={ContactPage} />
-          <Route path="/server-error" Component={ServerError} />
-          <Route path="/basket" Component={BasketPage} />
+        <Route path="/" element={<HomePage />} />
+        <Route element={<Container> <Outlet /> </Container>}>
+          <Route path="/catalog" element={<Catalog />} />
+          <Route path="/catalog/:id" element={<ProductDetails />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/server-error" element={<ServerError />} />
+          <Route path="/basket" element={<BasketPage />} />
           <Route path="/checkout" element={<PrivateRoute element={<CheckoutWrapper />} />} />
           <Route path="/orders" element={<PrivateRoute element={<Orders />} />} />
-          <Route path="/register" Component={Register} />
-          <Route path="/login" Component={Login} />
-          <Route Component={NotFound} />
-        </Routes>
-      </Container>
+          <Route path="/inventory" element={<PrivateRoute element={<Inventory />} />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
     </ThemeProvider>
   );
 }
