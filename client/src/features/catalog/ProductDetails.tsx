@@ -21,6 +21,7 @@ import { fetchProductAsync, productSelectors } from "./catalogSlice";
 
 export default function ProductDetails() {
   const {basket, status} = useAppSelector(state => state.basket);
+  const {user} = useAppSelector(state=> state.account);
   const dispatch = useAppDispatch();
   const { id } = useParams<{ id: string }>();
   const product = useAppSelector(state => productSelectors.selectById(state, parseInt(`${id}`)));
@@ -98,6 +99,7 @@ export default function ProductDetails() {
         </TableContainer>
         <Grid container spacing={2}>
             <Grid item xs={6}>
+            {user?.roles?.includes("Member") &&
                 <TextField 
                   onChange={handleInputChange}
                   variant="outlined"
@@ -105,9 +107,10 @@ export default function ProductDetails() {
                   label="Quantity in Cart"
                   fullWidth
                   value={quantity}
-                 />
+                 />}
             </Grid>
             <Grid item xs={6}>
+            {user?.roles?.includes("Member") &&
                 <LoadingButton
                   disabled={(item?.quantity === quantity) || (!item && quantity === 0)}
                   loading={status.includes("pending")}
@@ -119,7 +122,7 @@ export default function ProductDetails() {
                   fullWidth
                   >
                   {item ? "Update Quantity" : "Add to Cart"}
-                </LoadingButton>
+                </LoadingButton>}
             </Grid>
         </Grid>
       </Grid>

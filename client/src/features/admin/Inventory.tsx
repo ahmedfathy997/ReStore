@@ -68,8 +68,8 @@ export default function Inventory() {
                     <TableBody>
                         {products.map((product) => (
                             <TableRow
-                            key={`product-${product.id}`}
-                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                key={product.id}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
                                 <TableCell component="th" scope="row">
                                     {product.id}

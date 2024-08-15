@@ -21,6 +21,7 @@ interface Props {
 
 export default function ProductCard({ product }: Props) {
   const { status } = useAppSelector((state) => state.basket);
+  const {user} = useAppSelector(state=> state.account);
   const dispatch = useAppDispatch();
 
   return (
@@ -51,6 +52,7 @@ export default function ProductCard({ product }: Props) {
         </Typography>
       </CardContent>
       <CardActions>
+      {user?.roles?.includes("Member") &&
         <LoadingButton
           loading={status.includes("pendingAddIem" + product.id)}
           onClick={() =>
@@ -59,7 +61,7 @@ export default function ProductCard({ product }: Props) {
           size="small"
         >
           Add to cart
-        </LoadingButton>
+        </LoadingButton>}
         <Button component={Link} to={`/catalog/${product.id}`} size="small">
           View
         </Button>
