@@ -73,7 +73,7 @@ export default function Header({darkMode, handleThemeChange} : Props){
                         </List>
                     </Box>
                     <Box display="flex" alignItems="center">
-                    {(user?.roles?.includes("Member")) && 
+                    {(user?.roles?.includes("Member")) &&
                         <IconButton component={Link} to="/basket" size="large" sx={{color: "inherit"}}>
                             <Badge badgeContent={itemCount} color="secondary">
                                 <ShoppingCart />
